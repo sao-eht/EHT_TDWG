@@ -16,9 +16,8 @@ import LS as ls
 
 vex = ve.Vex("vex_files/EHT2017/night3.vex")
 
-nfiles = 100 # actual number of files we have (movie is periodic)
 period = 35.3 # minutes
-framedur_sec = period*60/nfiles # seconds per frame
+framedur_sec = 21.18 # seconds per frame
 
 # observation duration in hr
 mjd_s, mjd_e = vex.get_obs_timerange('SGRA')
