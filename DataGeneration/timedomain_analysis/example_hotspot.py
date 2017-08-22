@@ -26,7 +26,7 @@ duration_hr = (mjd_e - mjd_s)*24.
 nframes = int(np.round(duration_hr/(framedur_sec/3600.)))
 
 # load movie
-mov = lo.load_movie_fits_hotspot('HotSpot_Movies/model2-fits/model2-',\
+mov = lo.load_movie_fits_hotspot('Movies/HotSpot_Movies/model2-fits/model2-',\
         nframes, nfiles, framedur_sec, mjd=int(mjd_s), start_hr=(mjd_s-np.floor(mjd_s))*24.) # B230?
 
 # observe movie
@@ -85,7 +85,7 @@ freq, power = ls.get_LS_periodogram(clo.cp[15]) # frequency [1/hr] and normalize
 
 # calculate significance
 t = clo.cp[tri_id][0]
-signif = 0.01 # 1% significance
+signif = 0.001 # 0.1% significance
 print("Calculating %f significance value assuming background Gaussian noise."%(signif) )
 
 signif_z = ls.get_significance( t, signif )

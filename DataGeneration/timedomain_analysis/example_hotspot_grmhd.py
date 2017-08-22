@@ -28,7 +28,7 @@ duration_hr = (mjd_e - mjd_s)*24.
 nframes = int(np.round(duration_hr/(framedur_sec/3600.)))
 
 # load movie
-file = h5py.File("GRMHD_Movies/Bsim1M_hotspot.h5", 'r')
+file = h5py.File("Movies/GRMHD_Movies/Bsim1M_hotspot.h5", 'r')
 name = list(file.keys())[0]
 d = file[str(name)]
 sim = d[0:nframes]
@@ -89,7 +89,7 @@ freq, power = ls.get_LS_periodogram(clo.cp[15]) # frequency [1/hr] and normalize
 
 # calculate significance
 t = clo.cp[tri_id][0]
-signif = 0.01 # 1% significance
+signif = 0.001 # 0.1% significance
 print("Calculating %f significance value assuming background Gaussian noise."%(signif) )
 
 signif_z = ls.get_significance( t, signif )
