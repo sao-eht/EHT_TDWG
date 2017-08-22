@@ -57,7 +57,6 @@ tri_id = 15 # choose 15th triangle
 tri_name = clo.tri[tri_id][0]+"-"+clo.tri[tri_id][1]+"-"+clo.tri[tri_id][2]
 print("Plotting closure phase for "+tri_name )
 f.errorbar( clo.cp[tri_id][0], clo.cp[tri_id][1], yerr=clo.cp[tri_id][2], fmt='k.' )
-f.set_ylim(-300,300)
 f.set_title( tri_name )
 f.set_xlabel('UT [hr]')
 f.set_ylabel('CP [deg]')
@@ -67,7 +66,6 @@ quad_id = 20 # choose 20th quadrangle
 quad_name = clo.quad[quad_id][0]+"-"+clo.quad[quad_id][1]+"-"+clo.quad[quad_id][2]+"-"+clo.quad[quad_id][3]
 print("Plotting closure amplitude for "+quad_name)
 f.errorbar( clo.ca[quad_id][0], clo.ca[quad_id][1], yerr=clo.ca[quad_id][2], fmt='k.' )
-f.set_ylim(-30,30)
 f.set_title( quad_name )
 f.set_xlabel('UT [hr]')
 f.set_ylabel('CA')
@@ -105,9 +103,9 @@ f.plot(freq,power,'k-')
 f.plot([freq.min(),freq.max()],[signif_z,signif_z],'g-')
 f.set_xscale('log')
 
-f.plot([60./period,60./period],[0.,10],'b-') # mark the expected period
-f.plot([2.*60./period,2.*60./period],[0.,10],'b-') # and higher modes
-f.plot([3.*60./period,3.*60./period],[0.,10],'b-')
+f.plot([60./period,60./period],[0.,50],'b-') # mark the expected period
+f.plot([2.*60./period,2.*60./period],[0.,50],'b-') # and higher modes
+f.plot([3.*60./period,3.*60./period],[0.,50],'b-')
 	
 f.set_title( tri_name )
 f.set_xlabel('Frequency [1/hr]')

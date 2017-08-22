@@ -99,9 +99,9 @@ f.plot(freq,power,'k-')
 f.plot([freq.min(),freq.max()],[signif_z,signif_z],'g-')
 f.set_xscale('log')
 
-f.plot([60./period,60./period],[0.,10],'b-') # mark the expected period
-f.plot([2.*60./period,2.*60./period],[0.,10],'b-') # and higher modes
-f.plot([3.*60./period,3.*60./period],[0.,10],'b-')
+f.plot([60./period,60./period],[0.,50],'b-') # mark the expected period
+f.plot([2.*60./period,2.*60./period],[0.,50],'b-') # and higher modes
+f.plot([3.*60./period,3.*60./period],[0.,50],'b-')
 	
 f.set_title( tri_name )
 f.set_xlabel('Frequency [1/hr]')
