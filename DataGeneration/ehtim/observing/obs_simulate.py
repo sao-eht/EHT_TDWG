@@ -421,16 +421,16 @@ def observe_movie_nonoise(mov, obs, sgrscat=False, ft="direct", pad_frac=0.5, re
                     vvisim = nd.map_coordinates(np.imag(vvis_im), uv2)
                     vvis = phase*(vvisre + 1j*qvisim)
 
-                #visibilities from DFT
-                else:
-                    mat = ftmatrix(mov.psize, mov.xdim, mov.ydim, uv, pulse=mov.pulse)
-                    vis = np.dot(mat, mov.frames[n])
+            #visibilities from DFT
+            else:
+                mat = ftmatrix(mov.psize, mov.xdim, mov.ydim, uv, pulse=mov.pulse)
+                vis = np.dot(mat, mov.frames[n])
 
-                    if len(mov.qframes):
-                        qvis = np.dot(mat, mov.qframes[n])
-                        uvis = np.dot(mat, mov.uframes[n])
-                    if len(mov.vframes):
-                        vvis = np.dot(mat, mov.vframes[n])
+                if len(mov.qframes):
+                    qvis = np.dot(mat, mov.qframes[n])
+                    uvis = np.dot(mat, mov.uframes[n])
+                if len(mov.vframes):
+                    vvis = np.dot(mat, mov.vframes[n])
 
             # Scatter the visibilities with the SgrA* kernel
             if sgrscat:
