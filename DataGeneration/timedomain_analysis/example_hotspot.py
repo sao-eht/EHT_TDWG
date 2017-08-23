@@ -34,7 +34,6 @@ obs = mov.observe_vex( vex, 'SGRA', t_int=framedur_sec )
 
 # get closure quantity curves
 clo = cl.Closure(obs)
-print(clo.tarr)
 """
 clo.cp[triangle ID] = closure phase curves. (time, CP, error)
 clo.tri[triangle ID] = list of stations that consist the triangle
