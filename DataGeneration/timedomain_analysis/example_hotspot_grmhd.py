@@ -44,6 +44,7 @@ clo.cp[triangle ID] = closure phase curves. (time, CP, error)
 clo.tri[triangle ID] = list of stations that consist the triangle
 clo.ca[quadrangle ID] = closure amplitude curves. (time, CA, error)
 clo.quad[quadrangle ID] = list of stations that consist the quadrangle
+All the metadata of Obsdata are also copied to Closure.
 """
 
 
@@ -52,7 +53,7 @@ clo.quad[quadrangle ID] = list of stations that consist the quadrangle
 fig = plt.figure()
 f = fig.add_subplot(211)
 
-tri_id = 15 # choose 15th triangle
+tri_id = 12 # choose 12th triangle
 tri_name = clo.tri[tri_id][0]+"-"+clo.tri[tri_id][1]+"-"+clo.tri[tri_id][2]
 print("Plotting closure phase for "+tri_name )
 f.errorbar( clo.cp[tri_id][0], clo.cp[tri_id][1], yerr=clo.cp[tri_id][2], fmt='k.' )
@@ -73,17 +74,17 @@ plt.tight_layout()
 
 #------------------------------------------------------------
 # writing data examples 
-clo.record_cp(15) # record t vs. cp with error for 15th triangle
+clo.record_cp(12) # record t vs. cp with error for 12th triangle
 clo.record_ca(20) # record t vs. ca with error for 20th quadrangle
 
 
 #------------------------------------------------------------
 # getting periodogram examples
-tri_id = 15 # choose 15th triangle
+tri_id = 12 # choose 12th triangle
 tri_name = clo.tri[tri_id][0]+"-"+clo.tri[tri_id][1]+"-"+clo.tri[tri_id][2]
 print("Getting a LS periodogram for "+tri_name+" closure phase." )
 
-freq, power = ls.get_LS_periodogram(clo.cp[15]) # frequency [1/hr] and normalized power
+freq, power = ls.get_LS_periodogram(clo.cp[tri_id]) # frequency [1/hr] and normalized power
 
 
 # calculate significance
@@ -102,9 +103,8 @@ f.plot(freq,power,'k-')
 f.plot([freq.min(),freq.max()],[signif_z,signif_z],'g-')
 f.set_xscale('log')
 
-f.plot([60./period,60./period],[0.,50],'b-') # mark the expected period
-f.plot([2.*60./period,2.*60./period],[0.,50],'b-') # and higher modes
-f.plot([3.*60./period,3.*60./period],[0.,50],'b-')
+for fac in range(7):
+    f.plot([fac*60./period,fac*60./period],[0.,50],'b-') # mark the expected period and higher modes
 	
 f.set_title( tri_name )
 f.set_xlabel('Frequency [1/hr]')
