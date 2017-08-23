@@ -129,7 +129,7 @@ def load_movie_fits_hotspot(basename, nframes, nfiles, framedur, mjd=51544, star
     current_frame = 0
     for i in xrange(0,nframes):
 
-        i_file = current_frame - nfiles*(current_frame/nfiles) #assuming file set is smoothly periodic
+        i_file = current_frame - nfiles*int(current_frame/nfiles) #assuming file set is smoothly periodic
         filename = basename + "%02d" % i_file + ".fits" # model2-fits
         #filename = basename + "%04d" % i_file + ".fit" # model3
 	current_frame += 1
