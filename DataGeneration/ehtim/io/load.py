@@ -48,6 +48,7 @@ def load_movie_txt(basename, nframes, framedur=-1, pulse=PULSE_DEFAULT):
     ulist = []
 
     for i in range(nframes):
+	if i%10==0: print("%d/%d"%(i,nframes))
         filename = basename + "%05d" % i
 
         # Read the header
@@ -98,8 +99,8 @@ def load_movie_txt(basename, nframes, framedur=-1, pulse=PULSE_DEFAULT):
             qlist.append(qimage)
             ulist.append(uimage)
 
-    if frame_dur == -1:
-        frame_dur = (hour - hour0)/float(nframes)*3600.0
+    if framedur == -1:
+        framedur = (hour - hour0)/float(nframes)*3600.0
 
     out_mov = ehtim.movie.Movie(framelist, framedur, psize0, ra0, dec0, rf=rf0, source=src0, mjd=mjd0, start_hr=hour0, pulse=pulse)
 
