@@ -15,7 +15,6 @@ import LS as ls
 
 vex = ve.Vex("vex_files/EHT2017/night3.vex")
 
-period = 27. # minutes
 framedur_sec = 16.2 # seconds per frame
 
 # observation duration in hr
@@ -103,6 +102,7 @@ f.plot(freq,power,'k-')
 f.plot([freq.min(),freq.max()],[signif_z,signif_z],'g-')
 f.set_xscale('log')
 
+period = 27. # minutes
 for fac in range(7):
     f.plot([fac*60./period,fac*60./period],[0.,50],'b-') # mark the expected period and higher modes
 	
