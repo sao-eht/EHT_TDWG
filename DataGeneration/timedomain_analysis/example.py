@@ -4,7 +4,6 @@ from __future__ import print_function
 import numpy as np
 import matplotlib.pyplot as plt
 import itertools as it
-import h5py
 
 import ehtim as eh
 import ehtim.io.load as lo
