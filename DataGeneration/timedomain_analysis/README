@@ -1,0 +1,205 @@
+
+
+-- USAGE NOTE FOR THE TOOLS --
+(Hotaka Shiokawa, 8/29/2017, hshiokawa@cfa.harvard.edu )
+
+
+This directory contains tools that generate time vs. closure quantities
+with a thermal noise and the earth rotation effect taken into account,
+for all triangles and quadrangles that have data during a specified
+time range of an observation.  It is using eht-imaging package
+(https://github.com/achael/eht-imaging) written in Python3 developed by
+Andrew Chael.  The tools also have Lomb-Scargle analyser ready to work
+on the generated data with a preliminary significance calculator.
+
+
+The best way to get familiar with the tools is understanding the
+example code, "example.py", which we walk through line by line in this
+documentation.  After setting up your environment,
+
+>> python example.py
+
+will produce 3 plots in 2 windows.
+1st window:
+Closure phase [deg] vs Time [UT hr] for a specific triangle (ALMA-LMT-SMTO by default)
+Closure amplitude vs Time [UT hr] for a specific quadrangle (ALMA-LMT-SMAP-SPT by default)
+2nd window:
+Lomb-Scargle Periodogram for the closure phase plot in the 1st window
+with significance.
+
+
+There are few preparations needed to run example.py.  First, you need to
+add the reference to ehtim package (almost identical to the original but
+slightly modified for these new tools), which is defined in DataGeneration
+directory, to PYTHONPATH, e.g.:
+
+export PYTHONPATH=${PYTHONPATH}:'path to whereever you cloned EHT_TDWG'/EHT_TDWG/DataGeneration
+
+
+Secondly, you need to download movies to perform the
+synthetic observations on.  Please contact Hotaka Shiokawa
+(hshiokawa@cfa.harvard.edu) to obtain the links to the data files.
+Currently available ones are:
+1) Hot spot model introduced in Doeleman et al. (2009), model B (HotSpot)
+2) The above hot spot model merged with ray-traced movie of GRMHD
+disk simulation, disk model for a=0.94 in Roelofs et al. (2017) (HotSpot_Disk)
+3) The above hot spot model merged with ray-traced movie of GRMHD
+disk simulation, jet model for a=0.94 in Roelofs et al. (2017) (HotSpot_Jet)
+
+As a sub-step, you would need to install several python packages, such
+as astropy and gatspy if you do not have them yet.
+
+
+
+== example.py, line by line ==
+
+- Modules - 
+In addition to the ehtim modules, "closure" and "LS" need to be imported
+that are defined in this directory in closure.py and LS.py, respectively.
+closure.py manages operations regarding time series of closure quantities,
+and LS.py manages operations regarding Lomb-Scargle periodogram.
+The latter is independent from the rest of package/code.
+
+
+- Decide observational schedule --
+
+vex = ve.Vex("vex_files/EHT2017/night3.vex")
+
+The above line imports the real observational schedule used for the 3rd
+night of the EHT2017 observation.  The schedule, as well as various
+information regarding the observation, are written in "vex" format.
+Other EHT2017 vex files are available in the directory "vex_files",
+or more variations can be found on EHT wiki.
+
+
+- Decide number of frames to read-in, "nframes" -
+
+We first need to know duration of each frame in the movies, so that
+we can calculate how many frames are needed to be read-in for the given
+observational schedule.  All the models we currently have are based on the
+hotspot model of which the frame duration is 16.2sec. Orbital period of
+the hotspot is 27min, i.e.  the pure hot spot movie is repetitive every
+100 frames.  You can adjust the orbital period by tuning this variable,
+although too much speeding up/down makes those hotspot+GRMHD movies less
+physical as they are adjusted for SgrA* mass. The longer framedur_sec,
+the smaller thermal noise of the closure quantities will be.
+
+mjd_s, mjd_e = vex.get_obs_timerange('SGRA')
+
+This function gives you time range that a very first and last moments
+that any available station observe the source in modified Julian date.
+Number of frames "nframes" then is calculated by taking difference of
+them and divide by the frame duration.
+
+nframes = int(np.round(duration_hr/(framedur_sec/3600.)))
+
+
+- Load a movie -
+
+ehtim.movie.load_movie_* is used to read-in the movie frames to be
+synthetically observed, where * depends on format of the movie files.
+
+mov = lo.load_movie_txt("HotSpot_Disk/", nframes, framedur=framedur_sec)
+
+It returns a Movie object defined in ../ehtim/movie.py.  The standard
+format is self-explanatory and straight forward to understand once you
+see the actual file (which is in ASCII).  HotSpot_Disk and HotSpot_Jet
+are in this format and read-in by "load_movie_txt".  The original hot
+spot movie HotSpot is in fits format and only 100 frames are available
+that need to be used repeatedly since usual observation duration is much
+longer. For that reason the special "load_movie_fits_hotspot" is used.
+Choose a desired movie by commenting/uncommenting the lines, or create
+your own movie by following the standard format.
+
+
+- Observe the movie -
+
+The Movie object obtained in the previous step ("mov" in the example code)
+can be observed as
+
+obs = mov.observe_vex( vex, 'SGRA', t_int=framedur_sec )
+
+using the observation schedule in the vex file.  It returns Obsdata object
+defined in ../ehtim/obsdata.py.  The observation includes thermal noise
+but not scattering by default.  Pass sgrscat=True if you want to include
+scattering effects.  Another option is "mov.observe()" which is for a
+continuous observation.  Example usage of mov.observe() will be added.
+
+
+- Get closure quantities' time series -
+
+The Obsdata object ("obs" in the example code) obtained in the previous
+step contains information of time series of closure quantities.  We can
+conveniently manage it by obtaining Closure object as
+
+clo = cl.Closure(obs)
+
+defined in closure.py.  Now you can access the time series of closure
+phase as
+
+clo.cp[triangle ID]
+
+where "triangle ID" is ID of a triangle that you want to obtain data.
+Stations that consist the triangle is stored in
+
+clo.tri[triangle ID].
+
+In the example code, triangle ID is set to 12, where
+
+clo.tri[12] = ('ALMA', 'LMT', 'SMTO').'
+
+clo.tri contains all possible triangles that have data in the observation,
+i.e. len(clo.tri) = Total number of triangles that have data.  Note that
+it includes triangles that have stations at the same site, i.e.  SMAP and
+JCMT, and ALMA and APEX.  Those triangles should have negligibly small
+closure phase but only thermal noise.
+
+
+clo.cp[triangle ID] consists of 3 arrays:
+clo.cp[triangle ID][0] = time in UT[hr]
+clo.cp[triangle ID][1] = closure phase in degrees
+clo.cp[triangle ID][2] = error in degrees
+
+Therefore, you can plot time vs. closure phase for the 12th triangle as
+
+errorbar( clo.cp[12][0], clo.cp[12][1], yerr=clo.cp[12][2] )
+
+You can also record this data in ASCII file by
+
+clo.record_cp(12)
+
+which generates a file named "cp_ALMA-LMT-SMTO" with 3 columns of time,
+closure phase, and error.
+
+
+For closure amplitude, just change the array names to
+cp - > ca
+tri -> quad
+and 'triangle ID' is now 'quadrangle ID'.
+
+
+- Get Lomb-Scargle periodogram - 
+
+freq, power = LS.get_LS_periodogram(clo.cp[tri_id])
+
+This function, defined in LS.py, takes an array of format
+[[time],[value],[error]] (which is just the format of cp and ca in the
+code) and returns Lomb-Scargle periodogram.  You need to install gatspy
+package (http://www.astroml.org/gatspy/periodic/lomb_scargle.html) for
+this operation.  LS.py uses "LombScargleMultibandFast()" by default, but
+there are other options available.  Please see the description at the
+gatspy link.  The returned power is normalized, equivalent to equation
+13.8.4 of Numerical Recipes Third Edition.
+
+You can use a function that calculates significance value for a given
+time series.
+
+signif_z = LS.get_significance( t, signif )
+
+where signif=0.001 in the code, which means that the singificance of
+the returned value signif_z is 0.1% in a periodogram that uses the time
+series t.  In the example code, "t" is the time component of the closure
+quantities' array, e.g. clo.cp[12][0] for a periodogram of 12th triangle.
+One needs to be aware that the calculator works only for the case of
+the null hypothesis, which is not necessarily the case in our problem.
+See Section 13.8 Numerical Recipes Third Edition for more details.
