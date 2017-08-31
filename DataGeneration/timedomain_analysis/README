@@ -4,16 +4,19 @@
 (Hotaka Shiokawa, 8/29/2017, hshiokawa@cfa.harvard.edu )
 
 
-This directory contains tools that generate time vs. closure quantities
-with a thermal noise and the earth rotation effect taken into account,
-for all triangles and quadrangles that have data during a specified
-time range of an observation.  It is using eht-imaging package
-(https://github.com/achael/eht-imaging) written in Python3 developed by
-Andrew Chael.  The tools also have Lomb-Scargle analyser ready to work
-on the generated data with a preliminary significance calculator.
+This package generates time vs. closure quantities with a thermal
+noise, scattering, and the earth rotation effect taken into account,
+for all triangles and quadrangles that have data during a specified time
+range of an observation. It can generate unevenly spaced time series
+based on realistic observational schedules. The synthetic observation is
+performed by eht-imaging package (https://github.com/achael/eht-imaging),
+developed by Andrew Chael. Currently available tools are Lomb-Scargle
+periodogram calculator with a prelinimary significance calculator, and
+Q-metric calculator written by Freek Roelofs, that are ready to work on
+the generated data.
 
 
-The best way to get familiar with the tools is understanding the
+The best way to get familiar with the package is understanding the
 example code, "example.py", which we walk through line by line in this
 documentation.  After setting up your environment,
 
@@ -26,6 +29,8 @@ Closure amplitude vs Time [UT hr] for a specific quadrangle (ALMA-LMT-SMAP-SPT b
 2nd window:
 Lomb-Scargle Periodogram for the closure phase plot in the 1st window
 with significance.
+It will also produce Q-metric value for a specific triangle if
+the continuous_observation option is set to True.
 
 
 There are few preparations needed to run example.py.  First, you need to
@@ -33,7 +38,7 @@ add the reference to ehtim package (almost identical to the original but
 slightly modified for these new tools), which is defined in DataGeneration
 directory, to PYTHONPATH, e.g.:
 
-export PYTHONPATH=${PYTHONPATH}:'path to whereever you cloned EHT_TDWG'/EHT_TDWG/DataGeneration
+export PYTHONPATH=${PYTHONPATH}:'path to wherever you cloned EHT_TDWG'/EHT_TDWG/DataGeneration
 
 
 Secondly, you need to download movies to perform the
@@ -54,11 +59,12 @@ as astropy and gatspy if you do not have them yet.
 == example.py, line by line ==
 
 - Modules - 
-In addition to the ehtim modules, "closure" and "LS" need to be imported
-that are defined in this directory in closure.py and LS.py, respectively.
-closure.py manages operations regarding time series of closure quantities,
-and LS.py manages operations regarding Lomb-Scargle periodogram.
-The latter is independent from the rest of package/code.
+In addition to the ehtim modules, "closure", "LS", and "qmetric" need to
+be imported that are defined in this directory in closure.py and LS.py,
+respectively.  closure.py manages operations regarding time series of
+closure quantities, LS.py manages operations regarding Lomb-Scargle
+periodogram, and qmetric.py manages operations regarding Q-metric
+calculations.
 
 
 - Decide observational schedule --
@@ -89,9 +95,12 @@ mjd_s, mjd_e = vex.get_obs_timerange('SGRA')
 This function gives you time range that a very first and last moments
 that any available station observe the source in modified Julian date.
 Number of frames "nframes" then is calculated by taking difference of
-them and divide by the frame duration.
+them and divide by the frame duration + 1
 
-nframes = int(np.round(duration_hr/(framedur_sec/3600.)))
+nframes = int(np.round(duration_hr/(framedur_sec/3600.)))+1
+
+The next 3 lines are setting integer MJD, observation starting and ending
+time in hours that are needed in the observation.
 
 
 - Load a movie -
@@ -108,8 +117,8 @@ are in this format and read-in by "load_movie_txt".  The original hot
 spot movie HotSpot is in fits format and only 100 frames are available
 that need to be used repeatedly since usual observation duration is much
 longer. For that reason the special "load_movie_fits_hotspot" is used.
-Choose a desired movie by commenting/uncommenting the lines, or create
-your own movie by following the standard format.
+Choose a desired movie by changing the "model" parameter, or create your
+own movie by following the standard format for load_movie_txt().
 
 
 - Observe the movie -
@@ -121,9 +130,15 @@ obs = mov.observe_vex( vex, 'SGRA', t_int=framedur_sec )
 
 using the observation schedule in the vex file.  It returns Obsdata object
 defined in ../ehtim/obsdata.py.  The observation includes thermal noise
-but not scattering by default.  Pass sgrscat=True if you want to include
-scattering effects.  Another option is "mov.observe()" which is for a
-continuous observation.  Example usage of mov.observe() will be added.
+and scattering by option.  Pass sgrscat=True if you want to include
+the scattering effects.
+
+By setting continuous_observation=True, you can use another option
+"mov.observe()", which is for a continuous observation.  You can give
+an arbitrary observational time range, tstart and tstop.  They are set
+to the same value used for the vex-based-observation in the example
+code but you can change.  You can also choose band width and VLBI array
+configuration, although they are set to the vex value in the example code.
 
 
 - Get closure quantities' time series -
@@ -203,3 +218,7 @@ quantities' array, e.g. clo.cp[12][0] for a periodogram of 12th triangle.
 One needs to be aware that the calculator works only for the case of
 the null hypothesis, which is not necessarily the case in our problem.
 See Section 13.8 Numerical Recipes Third Edition for more details.
+
+
+- Calculate Q-metric -
+Will be edited... 
