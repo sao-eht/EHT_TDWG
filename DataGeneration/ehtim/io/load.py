@@ -36,7 +36,7 @@ def load_vex(fname):
 ##################################################################################################
 #!AC TODO this needs a lot of work
 #!AC TODO think about how to do the filenames
-def load_movie_txt(basename, nframes, framedur=-1, pulse=PULSE_DEFAULT):
+def load_movie_txt(basename, nframes, framedur=-1, mjd=MJD_DEFAULT, start_hr=0., pulse=PULSE_DEFAULT):
     """Read in a movie from text files and create a Movie object
        Text files should be filename + 00001, etc.
        Text files should have the same format as output from Image.save_txt()
@@ -48,7 +48,7 @@ def load_movie_txt(basename, nframes, framedur=-1, pulse=PULSE_DEFAULT):
     ulist = []
 
     for i in range(nframes):
-	if i%10==0: print("%d/%d"%(i,nframes))
+	if i%100==0: print("%d/%d"%(i,nframes))
         filename = basename + "%05d" % i
 
         # Read the header
@@ -59,8 +59,8 @@ def load_movie_txt(basename, nframes, framedur=-1, pulse=PULSE_DEFAULT):
         dec = file.readline().split()
         dec = np.sign(float(dec[2])) *(abs(float(dec[2])) + float(dec[4])/60.0 + float(dec[6])/3600.0)
         mjd_frac = float(file.readline().split()[2])
-        mjd = np.floor(mjd_frac)
-        hour = (mjd_frac - mjd)*24.0
+        mjd_in = np.floor(mjd_frac)
+        hour_in = (mjd_frac - mjd_in)*24.0
         rf = float(file.readline().split()[2]) * 1e9
         xdim = file.readline().split()
         xdim_p = int(xdim[2])
@@ -76,12 +76,16 @@ def load_movie_txt(basename, nframes, framedur=-1, pulse=PULSE_DEFAULT):
             src0 = src
             ra0 = ra
             dec0 = dec
-            mjd0 = mjd
-            hour0 = hour
             rf0 = rf
             xdim0 = xdim
             ydim0 = ydim
             psize0 = psize_x
+
+            if mjd!=MJD_DEFAULT: mjd0 = mjd
+            else: mjd0 = mjd_in
+            if start_hr!=0.: hour0 = start_hr
+            else: hour0 = hour_in
+
         else:
             pass
             #some checks on header consistency
@@ -102,6 +106,7 @@ def load_movie_txt(basename, nframes, framedur=-1, pulse=PULSE_DEFAULT):
     if framedur == -1:
         framedur = (hour - hour0)/float(nframes)*3600.0
 
+    print(len(framelist))
     out_mov = ehtim.movie.Movie(framelist, framedur, psize0, ra0, dec0, rf=rf0, source=src0, mjd=mjd0, start_hr=hour0, pulse=pulse)
 
     if len(qlist):
@@ -112,7 +117,7 @@ def load_movie_txt(basename, nframes, framedur=-1, pulse=PULSE_DEFAULT):
 
     return out_mov
 
-def load_movie_fits_hotspot(basename, nframes, nfiles, framedur, mjd=51544, start_hr=0., punit='deg', pulse=PULSE_DEFAULT):
+def load_movie_fits_hotspot(basename, nframes, nfiles, framedur, mjd=MJD_DEFAULT, start_hr=0., punit='deg', pulse=PULSE_DEFAULT):
     """Read in a movie from Avery's hotspot FITS files and create a Movie object.
     """
 
