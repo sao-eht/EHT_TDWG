@@ -21,24 +21,39 @@ framedur_sec = 16.2 # seconds per frame
 mjd_s, mjd_e = vex.get_obs_timerange('SGRA')
 duration_hr = (mjd_e - mjd_s)*24.
 
+# observation starting and ending time in UTC
+mjd = int(mjd_s)
+tstart = (mjd_s - int(mjd_s))*24.
+tstop = tstart + duration_hr
+
 # reuired number of frames to observe 'duration_hr' hours
-nframes = int(np.round(duration_hr/(framedur_sec/3600.)))
+nframes = int(np.round(duration_hr/(framedur_sec/3600.)))+1
 
 # Choose movie to load
 # Contact hshiokawa@cfa.harvard.edu for the movie files
 #----- Avery's hotspot model, Doeleman et al. (2009) Model B
-#mov = lo.load_movie_fits_hotspot('HotSpot/model2-', nframes, 100, framedur_sec, mjd=int(mjd_s), start_hr=(mjd_s-np.floor(mjd_s))*24.)
+#mov = lo.load_movie_fits_hotspot('HotSpot/model2-', nframes, 100, framedur_sec, mjd=mjd, start_hr=tstart)
 #----- Hotspot + GRMHD disk model, Roelofs et al. (2017)
-mov = lo.load_movie_txt("HotSpot_Disk/", nframes, framedur=framedur_sec)
+mov = lo.load_movie_txt("HotSpot_Disk/", nframes, framedur=framedur_sec, mjd=mjd, start_hr=tstart)
 #----- Hotspot + GRMHD jet model, Roelofs et al. (2017)
-#mov = lo.load_movie_txt("HotSpot_Jet/", nframes, framedur=framedur_sec)
+#mov = lo.load_movie_txt("HotSpot_Jet/", nframes, framedur=framedur_sec, mjd=mjd, start_hr=tstart)
 
-# observe movie
-obs = mov.observe_vex( vex, 'SGRA', t_int=framedur_sec )
+# observe movie 
+#----- Use vex file schedule
+obs = mov.observe_vex( vex, 'SGRA', t_int=framedur_sec, sgrscat=False )
+#----- or continuous observation
+"""
+array = vex.array # an array object containing sites with which to generate baselines
+tint = framedur_sec # the scan integration time 
+tadv = framedur_sec # the uniform cadence between scans in seconds
+bw = vex.bw_hz # band width
+obs = mov.observe( array, tint, tadv, tstart, tstop, bw, mjd=mjd, sgrscat=False )
+"""
 
 # get closure quantity curves
 clo = cl.Closure(obs)
 """
+Mnemonics
 clo.cp[triangle ID] = closure phase curves. (time, CP, error)
 clo.tri[triangle ID] = list of stations that consist the triangle
 clo.ca[quadrangle ID] = closure amplitude curves. (time, CA, error)
