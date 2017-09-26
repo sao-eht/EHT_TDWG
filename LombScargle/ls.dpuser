@@ -1,0 +1,40 @@
+/*** Calculate Lomb Scargle periodogram for given input data ***/
+
+/*** Initial steps ***/
+
+free   // purge global variables
+@function_scargle.dpuser  // load function "scargle"
+
+/*** Give file names here ***/
+
+infile  = "input.dat"  // input data file
+outfile = "output.dat"  // output file (ASCII)
+
+// Assumption: input data are in an ASCII file with 2 (or more) columns,
+// where column 1 contains the times, column 2 the data values.
+// The output file will have 2 columns:
+// column 1 are the sampling frequencies, column 2 the periodogram values
+
+/*** Import data ***/
+
+dat = import(infile)[1:2,*]  // import data file
+
+/*** Set periodogram frequencies ***/
+
+f1  = 1 / (max(dat[1,*]) - min(dat[1,*]))   // min. sampling frequency
+f2  = f1 * naxis2(dat) / 2                  // max. (= Nyquist) frequency
+bin = f1 / 8                                // frequency bin size
+
+// Fourier frequencies are spaced by f1.
+// Here, we oversample by a factor 8, thus "bin = f1 / 8".
+
+/*** Compute periodogram using function "scargle" ***/
+
+perio = scargle(dat[1,*], dat[2,*], f1, f2, bin)
+
+/*** Export periodogram to "outfile" ***/
+
+export outfile, perio, 10
+
+/*** THE END ***/
+

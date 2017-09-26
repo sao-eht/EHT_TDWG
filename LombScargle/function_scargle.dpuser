@@ -1,0 +1,66 @@
+/**************************************************************************
+
+DPUSER function SCARGLE:
+
+Purpose: Compute Lomb-Scargle periodogram of a time series.
+
+Note: Frequencies are 1/time, not angular frequencies (2*pi/time).
+
+Function arguments:
+
+- times:	1xN matrix as time vector
+- values:	1xN matrix as data vector
+- numin:	minimum sampling frequency (in units of 1/time)
+- numax:	maximum sampling frequency (in units of 1/time)
+- binsize:	size of frequency bins (in units of 1/time)
+
+Function output:
+
+2xN matrix containing periodogram
+column 1: frequencies in inverse units of "times"
+column 2: power amplitudes
+
+Reference: Scargle, J.D. 1982, ApJ, 263, 835
+
+***************************************************************************/
+
+function scargle, times, values, numin, numax, binsize {
+  
+  T = times - min(times)
+  X = values - avg(values)
+  
+  deltat = max(T)
+  
+  nbins = int((numax-numin) / binsize)
+  nu = [0:nbins-1]*binsize + numin
+
+  P = nu*0
+  
+  num1 = doublearray(nelements(X),nelements(P))
+  num2 = num1
+  den1 = num1
+  den2 = num1
+  
+  for i=1, nelements(P){
+    tau = (1/(4*pi()*nu[i]))*atan(total(sin(4*pi()*nu[i]*T)) , total(cos(4*pi()*nu[i]*T)))
+    for j=1, nelements(T){
+      num1[j,i] = X[j]*cos(2*pi()*nu[i]*(T[j]-tau))
+      den1[j,i] = cos(2*pi()*nu[i]*(T[j]-tau))^2
+      num2[j,i] = X[j]*sin(2*pi()*nu[i]*(T[j]-tau))
+      den2[j,i] = sin(2*pi()*nu[i]*(T[j]-tau))^2
+    }
+
+    P[i] = total(num1[*,i])^2 / total(den1[*,i]) + total(num2[*,i])^2 / total(den2[*,i])
+    
+  }
+  
+  output = doublearray(2, nelements(P))
+  output[1,*] = nu
+  output[2,*] = P / (2*variance(X))
+  
+  scargle = output
+  
+}
+
+/*** THE END *************************************************************/
+
