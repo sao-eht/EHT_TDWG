@@ -1,0 +1,58 @@
+#####################################################################
+
+# 1 -- SOFTWARE
+
+DPUSER is a data processing package developed and maintained by Thomas Ott at MPE Garching. Get the DPUSER binary from the project web page:
+
+http://www.mpe.mpg.de/~ott/dpuser/dpuser.html
+
+Pick the binary that matches your operating system. DPUSER is an out-of-the-box package and should run immediately without installing anything else.
+
+
+# 2 -- FILES
+
+You will need the following files:
+
+function_scargle.dpuser
+ls.dpuser
+
+Put both files in the same working directory.
+
+"ls.dpuser" is a DPUSER script that sets input and output parameters; you will need to edit this one (see below). "function_scargle.dpuser" is the function that calculates the periodogram.
+
+
+# 3 -- SETTING IN/OUTPUT
+
+Open "ls.dpuser" with a text editor. Go to line 10 and replace "input.dat" with the name of your data file. The file name must be in quotation marks (like "myname.dat"). Do not forget to save the file after editing.
+
+The input file is assumed to be an ASCII file with two (or more) columns: column 1 containing the times, column 2 containing the data values. Additional columns will be ignored.
+
+If you want, you can go to line 11 and replace "output.dat" with your preferred output file name. The file name must be in quotation marks. The output file is in ASCII format.
+
+The output file will have two columns separated by a single space: column 1 contains the sampling frequencies, column 2 the periodogram values. Sampling frequencies are in units of inverse time; e.g., if your data have a time axis in hours, the frequencies are in 1/hours. Note that the sampling frequencies are actual frequencies (1/time), not angular frequencies (2*pi/time).
+
+
+# 4 -- CALCULATING A PERIODOGRAM
+
+1. Edit "ls.dpuser" as discussed in Section 3.
+2. Start DPUSER.
+3. In DPUSER, say "@ls.dpuser" (without quotation marks). The calculation will take a few seconds usually.
+4. You should see a new output file now. You can plot this with your favorite plotting tool or process it for further analysis.
+
+
+# 5 -- SAMPLING FREQUENCIES
+
+For a time series of duration T and with N data points, "ls.dpuser" uses the following sampling frequencies:
+minimum frequency = 1/T
+maximum frequency = Nyquist frequency = N/(2T)
+
+From the minimum frequency onward, sampling progresses in steps of 1/(8T), corresponding to an oversampling by a factor 8 compared to regular Fourier frequency spacing (which is 1/T).
+
+If you want, you can chage these settings in "ls.dpuser".
+
+
+# 6 -- WORK IN PROGRESS
+
+The analysis of simulated EHT closure quantity time series suggests that their spectral power follows a broken power law. In addition, the periodogram is oversampled. These two effects complicate the calculation of significance levels. I am currently working on this.
+
+#####################################################################
