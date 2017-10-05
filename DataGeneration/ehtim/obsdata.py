@@ -875,10 +875,12 @@ class Obsdata(object):
 
                         if (sites[j], sites[k]) not in l_dict.keys():
                             continue
-
-                        red1 = l_dict[sites[i], sites[j]]
-                        red2 = l_dict[ref, sites[k]]
-                        blue2 = l_dict[sites[j], sites[k]]
+                        try:
+                            red1 = l_dict[sites[i], sites[j]]
+                            red2 = l_dict[ref, sites[k]]
+                            blue2 = l_dict[sites[j], sites[k]]
+                        except KeyError:
+                            continue
                         # Compute the closure amplitude and the error
                         (camp, camperr) = make_closure_amplitude(red1, red2, blue1, blue2, vtype, ctype=ctype)
 
@@ -901,10 +903,13 @@ class Obsdata(object):
                     for quad in (q, [q[0],q[2],q[1],q[3]], [q[0],q[1],q[3],q[2]]):
 
                         # Blue is numerator, red is denominator
-                        blue1 = l_dict[quad[0], quad[1]] #MJ: Need to add checks here
-                        blue2 = l_dict[quad[2], quad[3]]
-                        red1 = l_dict[quad[0], quad[3]]
-                        red2 = l_dict[quad[1], quad[2]]
+                        try:
+                            blue1 = l_dict[quad[0], quad[1]] #MJ: Need to add checks here
+                            blue2 = l_dict[quad[2], quad[3]]
+                            red1 = l_dict[quad[0], quad[3]]
+                            red2 = l_dict[quad[1], quad[2]]
+                        except KeyError:
+                            continue
 
                         # Compute the closure amplitude and the error
                         (camp, camperr) = make_closure_amplitude(red1, red2, blue1, blue2, vtype, ctype=ctype)
