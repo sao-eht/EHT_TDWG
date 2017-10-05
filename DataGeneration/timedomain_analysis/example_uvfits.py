@@ -5,15 +5,10 @@ from __future__ import print_function
 
 import numpy as np
 import matplotlib.pyplot as plt
-import itertools as it
 
-import ehtim as eh
 import ehtim.io.load as lo
-import ehtim.vex as ve
-import ehtim.movie as mv
 import closure as cl
 import LS as ls
-import qmetric as qm
 
 
 obs = lo.load_obs_uvfits("hops_uvfits_hi/hops_3597_3C279_hi_closed.uvfits")
